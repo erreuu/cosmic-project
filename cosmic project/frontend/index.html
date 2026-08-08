@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelompok 2 — Interactive Portfolio</title>
+    <meta name="description" content="An interactive portfolio by seven students — featuring personal profiles, music, and synchronized lyrics. Seven minds. One digital space.">
+    <meta property="og:title" content="Kelompok 2 — Interactive Portfolio">
+    <meta property="og:description" content="Seven minds. One digital space. Explore each member's identity, favorite music, and synchronized lyrics.">
+    <meta property="og:type" content="website">
+
+    <!-- Google Fonts: Literata & DM Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500&family=Literata:opsz,wght@7..72,200..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Particle Canvas (lightweight, JS-driven) -->
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+    <!-- Custom Interactive Cursor -->
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-outline" aria-hidden="true"></div>
+
+    <!-- Ambient Background Glows -->
+    <div class="ambient-glow glow-cyan" aria-hidden="true"></div>
+    <div class="ambient-glow glow-purple" aria-hidden="true"></div>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="mobile-nav-overlay" id="mobile-nav" role="dialog" aria-label="Navigation menu" aria-hidden="true">
+        <a href="#hero" class="mobile-nav-link">Intro</a>
+        <a href="#about" class="mobile-nav-link">About</a>
+        <a href="#team" class="mobile-nav-link">The Team</a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-nav" aria-label="Main navigation">
+        <a href="#hero" class="nav-brand" aria-label="Kelompok 2 — Home">KELOMPOK<span>2</span></a>
+        <ul class="nav-links" role="list">
+            <li><a href="#hero">Intro</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#team">The Team</a></li>
+        </ul>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobile-nav">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </nav>
+
+    <!-- ================================================================
+         HERO SECTION
+    ================================================================ -->
+    <header id="hero" class="hero-section">
+        <!-- Giant background marquee typography -->
+        <h1 class="hero-bg-text" aria-hidden="true">
+            <div class="hero-bg-track">
+                <span>KELOMPOK 2&nbsp;</span>
+                <span>KELOMPOK 2&nbsp;</span>
+            </div>
+        </h1>
+
+        <div class="hero-content">
+            <div class="hero-main-text reveal-text">
+                <p class="subtitle">SEVEN MINDS. ONE DIGITAL SPACE.</p>
+                <h2>Portofolio<br>Agit.</h2>
+            </div>
+
+            <!-- Asymmetric glass detail panel -->
+            <div class="hero-side-panel glass-panel reveal-fade">
+                <p class="panel-title">DESIGNED BY THE INITIATIVE</p>
+                <p class="panel-desc">Every member has a unique story and contribution. This is a collection of our ideas, creativity, and dedication throughout the learning process.</p>
+            </div>
+
+            <a href="#about" class="cta-button reveal-fade" id="cta-explore">
+                <span>Explore the Project</span>
+                <span class="btn-arrow" aria-hidden="true">→</span>
+            </a>
+        </div>
+
+        <div class="scroll-indicator" aria-hidden="true">
+            <span class="scroll-text">SCROLL TO CONTINUE</span>
+            <div class="scroll-line"></div>
+        </div>
+    </header>
+
+    <!-- ================================================================
+         ABOUT SECTION
+    ================================================================ -->
+    <section id="about" class="about-section">
+        <div class="about-container">
+            <h3 class="section-heading reveal-text">The Project</h3>
+            <p class="about-lead reveal-fade">
+                Website ini bukan hanya berisi profile setiap anggota, tetapi juga menjadi representasi perjalanan kami sebagai satu tim.
+                Di balik setiap halaman terdapat proses belajar dan kreativitas yang kami bangun bersama untuk menghasilkan
+                <strong>karya yang bermakna.</strong>
+            </p>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         TEAM SECTION — Holographic Cards
+    ================================================================ -->
+    <section id="team" class="team-section">
+        <h3 class="section-heading center-align reveal-text">Meet Our Team</h3>
+
+        <div class="team-grid">
+
+            <!-- Member 1 — Nabil (Active) -->
+            <a href="members/nabil/nabil.html"
+               class="holo-card tilt-element reveal-card"
+               aria-label="View Nabil's profile">
+                <div class="card-border" aria-hidden="true"></div>
+                <span class="member-num" aria-hidden="true">01</span>
+                <div class="card-content">
+                    <h4 class="member-name">Nabil</h4>
+                    <p class="member-role">
+                        Web Developer
+                        <span class="role-arrow" aria-hidden="true">→</span>
+                    </p>
+                </div>
+            </a>
+
+            <!-- Member 2 — Reserved / Empty (intentional) -->
+            <div class="holo-card coming-soon reveal-card" aria-label="Member 2 — Reserved" aria-disabled="true">
+                <div class="card-border" aria-hidden="true"></div>
+                <span class="member-num" aria-hidden="true">02</span>
+                <div class="card-content">
+                    <h4 class="member-name">Member 2</h4>
+                    <p class="member-role">View Identity <span class="role-arrow" aria-hidden="true">→</span></p>
+                </div>
+            </div>
+
+            <!-- Member 3 — Reza (Active) -->
+            <a href="members/reza/reza.html"
+               class="holo-card tilt-element reveal-card"
+               aria-label="View Reza's profile">
+                <div class="card-border" aria-hidden="true"></div>
+                <span class="member-num" aria-hidden="true">03</span>
+                <div class="card-content">
+                    <h4 class="member-name">Reza</h4>
+                    <p class="member-role">
+                        UI/UX Designer
+                        <span class="role-arrow" aria-hidden="true">→</span>
+                    </p>
+                </div>
+            </a>
+
+            <!-- Member 4 — Rahma (Active) -->
+            <a href="members/rahma/rahma.html"
+               class="holo-card tilt-element reveal-card"
+               aria-label="View Rahma's profile">
+                <div class="card-border" aria-hidden="true"></div>
+                <span class="member-num" aria-hidden="true">04</span>
+                <div class="card-content">
+                    <h4 class="member-name">Rahma</h4>
+                    <p class="member-role">
+                        Graphic Designer
+                        <span class="role-arrow" aria-hidden="true">→</span>
+                    </p>
+                </div>
+            </a>
+
+            <!-- Member 5 — Neha (Active) -->
+            <a href="members/neha/neha.html"
+               class="holo-card tilt-element reveal-card"
+               aria-label="View Neha's profile">
+                <div class="card-border" aria-hidden="true"></div>
+                <span class="member-num" aria-hidden="true">05</span>
+                <div class="card-content">
+                    <h4 class="member-name">Neha</h4>
+                    <p class="member-role">
+                        IT Support
+                        <span class="role-arrow" aria-hidden="true">→</span>
+                    </p>
+                </div>
+            </a>
+
+            <!-- Member 6 — Nazirah (Active) -->
+            <a href="members/nazirah/nazirah.html"
+               class="holo-card tilt-element reveal-card"
+               aria-label="View Nazirah's profile">
+                <div class="card-border" aria-hidden="true"></div>
+                <span class="member-num" aria-hidden="true">06</span>
+                <div class="card-content">
+                    <h4 class="member-name">Nazirah</h4>
+                    <p class="member-role">
+                        Canva Designer
+                        <span class="role-arrow" aria-hidden="true">→</span>
+                    </p>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ================================================================
+         FOOTER
+    ================================================================ -->
+    <footer class="site-footer reveal-fade">
+        <div class="footer-brand">
+            <strong>Kelompok 2</strong>
+            SEVEN MINDS · ONE DIGITAL SPACE
+        </div>
+        <div class="footer-right">
+            <a href="#hero" class="back-to-top" aria-label="Back to top">
+                ↑ Back to top
+            </a>
+            <p class="footer-copy">© 2026 Interactive Portfolio · All rights reserved</p>
+        </div>
+    </footer>
+
+    <script src="java script/script.js"></script>
+</body>
+</html>

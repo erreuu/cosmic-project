@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nazirah — Identity | Kelompok 2 Portfolio</title>
+    <meta name="description" content="Nabil EL Aufa — Web Developer. Personal profile featuring biography, skills, favorite song with synchronized lyrics, and more.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Cinematic Noise Overlay -->
+    <div class="noise-overlay" aria-hidden="true"></div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
+
+    <!-- Navigation -->
+    <nav class="profile-nav" aria-label="Member page navigation">
+        <a href="../../index.html" class="back-link" aria-label="Back to all members">← View All Members</a>
+        <span class="nav-id" aria-label="Identity number 01, Web Developer">06 / Canva Designer</span>
+    </nav>
+
+    <!-- ================================================================
+         STICKY MINI-PLAYER (shown when scrolling past song section)
+    ================================================================ -->
+    <div class="mini-player" id="mini-player" aria-label="Now playing — mini player" aria-live="polite">
+        <img src="assets/images/nazirahcover.jpg" alt="Typa Girl cover art" class="mini-cover" id="mini-cover">
+        <div class="mini-info">
+            <span class="mini-title">typa girl</span>
+            <span class="mini-artist">blackpink</span>
+        </div>
+        <div class="mini-waveform" id="mini-waveform">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <button class="mini-play-btn" id="mini-play-btn" aria-label="Play / Pause">▶</button>
+    </div>
+
+    <main>
+
+        <!-- ================================================================
+             1. HERO
+        ================================================================ -->
+        <section class="fullscreen-section hero-section" id="section-hero">
+            <div class="ambient-gradient hero-glow" aria-hidden="true"></div>
+
+            <div class="hero-content">
+                <p class="hero-mono fade-up">IDENTITY 06</p>
+                <h1 class="hero-title fade-up" style="--delay: 0.1s">Nazirah.</h1>
+                <p class="hero-subtitle fade-up" style="--delay: 0.2s">jangan takut gagal,semua orang pasti pernah jatuh.</p>
+            </div>
+
+            <div class="scroll-indicator fade-up" style="--delay: 0.5s" aria-hidden="true">
+                <div class="mouse-icon">
+                    <div class="wheel"></div>
+                </div>
+                <span>Descend</span>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             1.5. INTRODUCTION
+        ================================================================ -->
+        <section class="fullscreen-section intro-section">
+            <div class="story-container">
+                <p class="section-label fade-up">INITIALIZING PROFILE</p>
+                <h2 class="story-text fade-up" style="--delay: 0.2s">
+                    Hi everyone! i'm nazirah. Welcome to my website! here, you can get to know me and discover some of 
+                    <span class="highlight">my interest</span>
+                </h2>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             2. ABOUT ME — Story
+        ================================================================ -->
+        <section class="fullscreen-section story-section">
+            <div class="story-container">
+                <h2 class="story-text text-reveal">
+                    Believe in yourself,
+                    <span class="highlight">keep learning, </span> 
+                    <span class="highlight">and never give up,</span>
+                    <span class="highlight">Every small step brings you closer to your dreams.</span>
+                    <span class="highlight"></span>
+                </h2>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             3. SKILLS
+        ================================================================ -->
+        <section class="fullscreen-section skills-section">
+            <div class="skills-container">
+                <p class="section-label">CAPABILITIES</p>
+
+                <div class="skill-row">
+                    <div class="skill-info">
+                        <span class="skill-name">Social Media Design</span>
+                        <span class="skill-pct">80%</span>
+                    </div>
+                    <div class="skill-track">
+                        <div class="skill-fill" data-target="80%"></div>
+                    </div>
+                </div>
+
+                <div class="skill-row">
+                    <div class="skill-info">
+                        <span class="skill-name">Poster Design</span>
+                        <span class="skill-pct">80%</span>
+                    </div>
+                    <div class="skill-track">
+                        <div class="skill-fill" data-target="80%"></div>
+                    </div>
+                </div>
+
+                <div class="skill-row">
+                    <div class="skill-info">
+                        <span class="skill-name">Thumbnail Design</span>
+                        <span class="skill-pct">80%</span>
+                    </div>
+                    <div class="skill-track">
+                        <div class="skill-fill" data-target="80%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             4. FAVORITE SONG — Music Player
+        ================================================================ -->
+        <section class="fullscreen-section song-section" id="song-section">
+            <div class="ambient-gradient song-glow" aria-hidden="true"></div>
+
+            <div class="song-showcase-wrapper">
+
+                <div class="audio-player-container" id="audio-player-container">
+                    <!-- Hidden audio element -->
+                    <audio id="bgm-audio" src="assets/music/Typa Girl.mp3" preload="metadata"></audio>
+
+                    <!-- Vinyl Album Art -->
+                    <div class="album-art" id="album-art" role="img" aria-label="Album cover: Typa Girl by BLACKPINK">
+                        <img src="assets/images/nazirahcover.jpg" alt="Typa Girl — BLACKPINK album cover" class="cover-img" id="cover-img">
+                    </div>
+
+                    <!-- Song Details & Controls -->
+                    <div class="song-details">
+                        <p class="section-label">CURRENT ROTATION</p>
+                        <h3 class="song-title">typa girl</h3>
+                        <p class="song-artist">blackpink</p>
+
+                        <!-- Progress Bar -->
+                        <div class="progress-wrapper" role="group" aria-label="Song progress">
+                            <span class="time-label time-current" id="time-current" aria-live="off">0:00</span>
+                            <div class="progress-track"
+                                 id="progress-track"
+                                 role="slider"
+                                 aria-label="Song position"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 aria-valuenow="0"
+                                 tabindex="0">
+                                <div class="progress-fill" id="progress-fill">
+                                    <div class="progress-thumb"></div>
+                                </div>
+                            </div>
+                            <span class="time-label time-end" id="time-end" aria-live="off">0:00</span>
+                        </div>
+
+                        <!-- Play button + Equalizer -->
+                        <div class="player-controls">
+                            <button class="play-btn" id="play-btn" aria-label="Play Typa Girl by BLACKPINK">
+                                <span class="play-icon" aria-hidden="true">▶</span>
+                                <span class="pause-icon" aria-hidden="true">⏸</span>
+                            </button>
+
+                            <div class="waveform" id="waveform" aria-hidden="true">
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                            </div>
+                        </div>
+
+                        <!-- Volume -->
+                        <div class="volume-row" role="group" aria-label="Volume control">
+                            <span class="volume-icon" id="volume-icon" aria-hidden="true">🔉</span>
+                            <input
+                                type="range"
+                                class="volume-slider"
+                                id="volume-slider"
+                                min="0"
+                                max="1"
+                                step="0.02"
+                                value="1"
+                                aria-label="Volume"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Song Description -->
+                <div class="song-description-box fade-up" style="--delay: 0.3s">
+                    <p>
+                        "makna lagu typa girl adalah percayalah pada dirimu,ketahui nilai dirimu,dan jangan pernah takut menjadi dirimu sendiri.kamu tidak membutuhakan persetujuan siapapun untuk bersinar."
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================================================================
+             5. LYRICS EXPERIENCE (Auto-Sync)
+        ================================================================ -->
+        <section class="fullscreen-section lyrics-section" id="lyrics-section">
+            <div class="lyrics-wrapper">
+                <div class="lyrics-container" id="lyrics-container" aria-live="polite" aria-atomic="false">
+                    <!-- Lyrics injected by JavaScript from .lrc file -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             6. DVD LOGO EASTER EGG
+        ================================================================ -->
+        <section class="fullscreen-section dvd-section" id="dvd-container">
+            <p class="section-label absolute-label">SYSTEM IDLE // EASTER EGG</p>
+            <div id="dvd-logo" aria-hidden="true">Nazirah</div>
+        </section>
+
+        <!-- ================================================================
+             7. FAVORITE QUOTE
+        ================================================================ -->
+        <section class="fullscreen-section quote-section">
+            <h2 class="massive-quote fade-up">
+                "Turning ideas into beautiful design, one creation at a time.<br>"
+            </h2>
+        </section>
+
+        <!-- ================================================================
+             8. GALLERY
+        ================================================================ -->
+        <section class="fullscreen-section gallery-section">
+            <div class="gallery-grid">
+                <div class="gallery-item fade-up">
+                    <div class="img-placeholder">LOG 01 // SERVER RACK</div>
+                </div>
+                <div class="gallery-item fade-up" style="--delay: 0.1s">
+                    <div class="img-placeholder">LOG 02 // SPLICING</div>
+                </div>
+                <div class="gallery-item fade-up" style="--delay: 0.2s">
+                    <div class="img-placeholder">LOG 03 // TOPOLOGY</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             9. CONTACT
+        ================================================================ -->
+        <section class="fullscreen-section contact-section">
+            <div class="contact-content">
+                <h2 class="hero-title fade-up">Initiate Ping.</h2>
+                <a href="mailto:cupcakeFreak@group.my.id"
+                   class="magnetic-btn fade-up"
+                   style="--delay: 0.2s"
+                   aria-label="Send email to Nabil">
+                    cupcakeFreak@group.my.id
+                </a>
+                <div class="footer-bottom">
+                    <p class="hero-mono">© 2026 Interactive Portfolio · Kelompok 2</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="java script/script.js"></script>
+</body>
+</html>
