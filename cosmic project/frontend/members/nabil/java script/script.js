@@ -1,6 +1,8 @@
 /* ==========================================================================
-   NABIL PROFILE — PREMIUM INTERACTIONS
-   Single rAF loop, no layout-thrash, production-quality audio player.
+   NABIL PROFILE — DOODLE SKETCHBOOK INTERACTIONS
+   Preserves all audio/LRC logic. Adds: parallax, bg journey, scroll bar,
+   section counter, hero char trigger, draw-path reveals.
+   Single rAF loop, no layout thrash, no external dependencies.
    ========================================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,9 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
     /* -----------------------------------------------------------------------
        0. CAPABILITY FLAGS
     ----------------------------------------------------------------------- */
-    const isMobile       = window.matchMedia("(max-width: 600px)").matches;
-    const isCoarse       = window.matchMedia("(hover: none), (pointer: coarse)").matches;
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile        = window.matchMedia("(max-width: 600px)").matches;
+    const isCoarse        = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    const prefersReduced  = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const enablePointerFX = !isMobile && !isCoarse && !prefersReduced;
 
     /* -----------------------------------------------------------------------
@@ -32,268 +34,388 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* -----------------------------------------------------------------------
-       2. CUSTOM CURSOR (rAF-driven, no .animate() storm)
+       2. CUSTOM CURSOR
     ----------------------------------------------------------------------- */
     const cursorDot  = document.querySelector(".cursor-dot");
     const cursorRing = document.querySelector(".cursor-ring");
 
     if (enablePointerFX && cursorDot && cursorRing) {
+        let dotX = pointer.x, dotY = pointer.y;
         let ringX = pointer.x, ringY = pointer.y;
 
         frameTasks.push(() => {
-            cursorDot.style.transform =
-                `translate(${pointer.x}px, ${pointer.y}px) translate(-50%, -50%)`;
+            dotX  += (pointer.x - dotX)  * 0.85;
+            dotY  += (pointer.y - dotY)  * 0.85;
+            ringX += (pointer.x - ringX) * 0.12;
+            ringY += (pointer.y - ringY) * 0.12;
 
-            ringX += (pointer.x - ringX) * 0.15;
-            ringY += (pointer.y - ringY) * 0.15;
-            cursorRing.style.transform =
-                `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+            cursorDot.style.transform  = `translate(${dotX - 2.5}px, ${dotY - 2.5}px)`;
+            cursorRing.style.transform = `translate(${ringX - 15}px, ${ringY - 15}px)`;
         });
 
-        document.querySelectorAll("a, button, .gallery-item").forEach((el) => {
-            el.addEventListener("mouseenter", () => cursorRing.classList.add("cursor-hover"));
-            el.addEventListener("mouseleave", () => cursorRing.classList.remove("cursor-hover"));
-        });
-    } else {
-        cursorDot  && (cursorDot.style.display  = "none");
-        cursorRing && (cursorRing.style.display = "none");
+        // Hover state on interactive elements
+        document.querySelectorAll("a, button, input, [role='slider'], .polaroid, .play-btn")
+            .forEach((el) => {
+                el.addEventListener("mouseenter", () => cursorRing.classList.add("cursor-hover"));
+                el.addEventListener("mouseleave", () => cursorRing.classList.remove("cursor-hover"));
+            });
     }
 
     /* -----------------------------------------------------------------------
-       3. NAVIGATION SCROLL STATE
+       3. NAVIGATION — glass on scroll
     ----------------------------------------------------------------------- */
     const nav = document.querySelector(".profile-nav");
     window.addEventListener("scroll", () => {
-        nav && nav.classList.toggle("scrolled", window.scrollY > 60);
+        if (nav) nav.classList.toggle("scrolled", window.scrollY > 60);
     }, { passive: true });
 
     /* -----------------------------------------------------------------------
-       4. SCROLL REVEAL (single shared IntersectionObserver)
+       4. PARALLAX DOODLE LAYERS (adapted from Horizon Hero technique)
+          Three layers at different speeds create perceived depth.
+          Lerp-smoothed inside rAF loop.
     ----------------------------------------------------------------------- */
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add("is-visible");
+    if (!prefersReduced) {
+        const parallaxConfig = [
+            { selector: ".doodle-layer--slow", speed: 0.06 },
+            { selector: ".doodle-layer--mid",  speed: 0.18 },
+            { selector: ".doodle-layer--fast", speed: 0.32 },
+        ];
 
-            // Trigger skill bars when skills section enters view
-            if (entry.target.classList.contains("skills-section")) {
-                entry.target.querySelectorAll(".skill-fill").forEach((fill) => {
-                    fill.style.width = fill.getAttribute("data-target");
+        const parallaxLayers = parallaxConfig
+            .map(({ selector, speed }) => {
+                const el = document.querySelector(selector);
+                return el ? { el, speed, y: 0 } : null;
+            })
+            .filter(Boolean);
+
+        let scrollYTarget = 0;
+        window.addEventListener("scroll", () => {
+            scrollYTarget = window.scrollY;
+        }, { passive: true });
+
+        if (parallaxLayers.length > 0) {
+            frameTasks.push(() => {
+                parallaxLayers.forEach((layer) => {
+                    const targetY = scrollYTarget * layer.speed;
+                    layer.y += (targetY - layer.y) * 0.06;
+                    layer.el.style.transform = `translateY(-${layer.y}px)`;
                 });
-                revealObserver.unobserve(entry.target);
+            });
+        }
+    }
+
+    /* -----------------------------------------------------------------------
+       5. BACKGROUND COLOUR JOURNEY
+          Body background shifts through the blue palette as the user scrolls
+          through sections — mirrors the Horizon Hero camera journey concept.
+    ----------------------------------------------------------------------- */
+    const bgJourneyColors = [
+        "#e8f4fd", // 1. Hero      — bright sky
+        "#eef7fd", // 2. Intro     — soft paper sky
+        "#f2f8ff", // 3. Story     — near white
+        "#f7faff", // 4. Skills    — light paper
+        "#eef6fc", // 5. Music     — soft blue
+        "#e6f0f9", // 6. Lyrics    — deeper blue
+        "#dce9f5", // 7. DVD       — dusk blue
+        "#d4e4f2", // 8. Quote     — quiet evening
+        "#e2eef8", // 9. Gallery   — paper again
+        "#f5f9ff", // 10. Contact  — clean close
+    ];
+
+    const sectionIds = [
+        "section-hero", "section-intro", "section-story", "section-skills",
+        "song-section", "lyrics-section", "dvd-container",
+        "section-quote", "section-gallery", "section-contact",
+    ];
+
+    const totalSections = sectionIds.length;
+
+    function setBgColor(index) {
+        const color = bgJourneyColors[Math.max(0, Math.min(index, bgJourneyColors.length - 1))];
+        document.body.style.backgroundColor = color;
+    }
+
+    /* -----------------------------------------------------------------------
+       6. SCROLL PROGRESS BAR + SECTION COUNTER
+    ----------------------------------------------------------------------- */
+    const scrollBarEl = document.getElementById("scroll-bar");
+    const scrollFill  = document.getElementById("scroll-fill");
+    const counterEl   = document.getElementById("scroll-counter");
+
+    function updateScrollBar() {
+        const scrollY    = window.scrollY;
+        const maxScroll  = document.documentElement.scrollHeight - window.innerHeight;
+        const pct        = maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) * 100 : 0;
+
+        if (scrollFill) scrollFill.style.width = `${pct}%`;
+        if (scrollBarEl) scrollBarEl.classList.toggle("visible", scrollY > 120);
+    }
+
+    window.addEventListener("scroll", updateScrollBar, { passive: true });
+
+    /* Section observer — updates counter + background */
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const idx = sectionIds.indexOf(entry.target.id);
+                if (idx !== -1) {
+                    if (counterEl) {
+                        counterEl.textContent =
+                            `${String(idx + 1).padStart(2, "0")} / ${String(totalSections).padStart(2, "0")}`;
+                    }
+                    setBgColor(idx);
+                }
             }
         });
-    }, {
-        threshold: 0.18,
-        rootMargin: "0px 0px -80px 0px",
-    });
+    }, { threshold: 0.45 });
 
-    document.querySelectorAll(".fade-up, .story-text, .skills-section").forEach((el) => {
-        revealObserver.observe(el);
+    sectionIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) sectionObserver.observe(el);
     });
 
     /* -----------------------------------------------------------------------
-       5. DVD EASTER EGG
-       Starts when audio plays, pauses when audio pauses.
+       7. HERO — DRAW-PATH + UNDERLINE TRIGGER ON LOAD
     ----------------------------------------------------------------------- */
-    const dvdContainer = document.getElementById("dvd-container");
-    const dvdLogo      = document.getElementById("dvd-logo");
-    let dvdX = 30, dvdY = 30;
-    let dirX = 2.2, dirY = 1.8;
-    let dvdAnimId = null;
-
-    const dvdColors = ["#E05800", "#F5E0C3", "#7A6B5C", "#00E5FF", "#7C3AED"];
-
-    function changeColor() {
-        const c = dvdColors[Math.floor(Math.random() * dvdColors.length)];
-        dvdLogo.style.color       = c;
-        dvdLogo.style.borderColor = c;
-        dvdLogo.style.textShadow  = `0 0 12px ${c}`;
-        dvdLogo.style.boxShadow   = `inset 0 0 20px ${c}33, 0 0 20px ${c}33`;
-    }
-
-    function animateDVD() {
-        if (!dvdContainer || !dvdLogo) return;
-        const box  = dvdContainer.getBoundingClientRect();
-        const logo = dvdLogo.getBoundingClientRect();
-
-        dvdX += dirX;
-        dvdY += dirY;
-
-        if (dvdX + logo.width >= box.width  || dvdX <= 0) { dirX *= -1; changeColor(); }
-        if (dvdY + logo.height >= box.height || dvdY <= 0) { dirY *= -1; changeColor(); }
-
-        dvdLogo.style.transform = `translate(${dvdX}px, ${dvdY}px)`;
-        dvdAnimId = requestAnimationFrame(animateDVD);
+    if (!prefersReduced) {
+        setTimeout(() => {
+            document.querySelectorAll(".hero-underline.draw-path").forEach((el) => {
+                el.classList.add("is-visible");
+            });
+        }, 900);
+    } else {
+        document.querySelectorAll(".draw-path").forEach((el) => el.classList.add("is-visible"));
     }
 
     /* -----------------------------------------------------------------------
-       6. AUDIO PLAYER — PREMIUM VERSION
-       Progress bar (seekable), current/duration time, volume, vinyl spin,
-       waveform equalizer, play/pause with all visual states synced.
+       8. SCROLL REVEAL — IntersectionObserver fallback
+          Only applies when native CSS scroll-driven animations aren't supported.
+          Feature-detected via @supports check mirrored in JS.
     ----------------------------------------------------------------------- */
-    const audio         = document.getElementById("bgm-audio");
-    const playBtn       = document.getElementById("play-btn");
-    const albumArt      = document.getElementById("album-art");
-    const waveform      = document.getElementById("waveform");
+    // Feature detect: mirrors the CSS @supports guard exactly
+    const supportsScrollDriven =
+        CSS.supports("(animation-timeline: scroll()) and (animation-range: 0% 100%)");
+
+    if (!supportsScrollDriven) {
+        const revealEls = document.querySelectorAll(".reveal-up");
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        revealEls.forEach((el) => revealObserver.observe(el));
+
+        // Quote section fallback
+        const quoteSec = document.getElementById("section-quote");
+        if (quoteSec) {
+            const quoteObs = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        quoteSec.classList.add("is-visible");
+                        quoteObs.unobserve(quoteSec);
+                    }
+                });
+            }, { threshold: 0.3 });
+            quoteObs.observe(quoteSec);
+        }
+    }
+
+    /* Draw-path elements (not hero underline — those are above) */
+    const drawPathEls = document.querySelectorAll(".draw-path:not(.hero-underline)");
+    const drawObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                drawObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+    drawPathEls.forEach((el) => drawObserver.observe(el));
+
+    /* -----------------------------------------------------------------------
+       9. STORY TEXT HIGHLIGHT REVEAL
+    ----------------------------------------------------------------------- */
+    const storyText = document.getElementById("story-text");
+    if (storyText) {
+        const storyObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    storyText.classList.add("is-visible");
+                    storyObserver.unobserve(storyText);
+                }
+            });
+        }, { threshold: 0.3 });
+        storyObserver.observe(storyText);
+    }
+
+    /* -----------------------------------------------------------------------
+       10. SKILL BARS (IntersectionObserver — fill animates on enter)
+    ----------------------------------------------------------------------- */
+    const skillsSection = document.querySelector(".skills-section");
+    if (skillsSection) {
+        const skillObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.querySelectorAll(".skill-fill").forEach((fill) => {
+                        const target = fill.dataset.target || "0%";
+                        setTimeout(() => {
+                            fill.style.width = target;
+                        }, 200);
+                    });
+                    skillObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.35 });
+        skillObserver.observe(skillsSection);
+    }
+
+    /* -----------------------------------------------------------------------
+       11. AUDIO PLAYER — fully preserved, recoloured to blue palette
+    ----------------------------------------------------------------------- */
+    const audio        = document.getElementById("bgm-audio");
+    const playBtn      = document.getElementById("play-btn");
     const progressTrack = document.getElementById("progress-track");
     const progressFill  = document.getElementById("progress-fill");
-    const timeCurrent   = document.getElementById("time-current");
-    const timeEnd       = document.getElementById("time-end");
+    const timeCurrentEl = document.getElementById("time-current");
+    const timeEndEl     = document.getElementById("time-end");
+    const waveformEl    = document.getElementById("waveform");
+    const albumArt      = document.getElementById("album-art");
+    const playerContainer = document.getElementById("audio-player-container");
     const volumeSlider  = document.getElementById("volume-slider");
-    const volumeIcon    = document.getElementById("volume-icon");
-    const playerCard    = document.getElementById("audio-player-container");
+    const volumeIconEl  = document.getElementById("volume-icon");
 
-    // Mini-player
-    const miniPlayer  = document.getElementById("mini-player");
-    const miniPlayBtn = document.getElementById("mini-play-btn");
-    const miniWave    = document.getElementById("mini-waveform");
+    if (!audio || !playBtn) return; // guard: leave if player not found
 
     let isPlaying = false;
+    let seekDragging = false;
+    let hasPreviouslyPlayed = false;  // guard: paused-spin only after first play
 
-    // Format seconds → "M:SS"
-    function formatTime(secs) {
-        if (!isFinite(secs) || secs < 0) return "0:00";
-        const m = Math.floor(secs / 60);
-        const s = Math.floor(secs % 60);
-        return `${m}:${s.toString().padStart(2, "0")}`;
+    function formatTime(s) {
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s % 60);
+        return `${m}:${sec.toString().padStart(2, "0")}`;
     }
 
-    // Enter playing state
-    function enterPlayingState() {
-        isPlaying = true;
-        playBtn.classList.add("is-playing");
-        playBtn.setAttribute("aria-label", "Pause");
+    function setPlayingState(playing) {
+        isPlaying = playing;
+        if (playing) hasPreviouslyPlayed = true;
 
-        albumArt.classList.add("playing");
-        albumArt.classList.remove("paused-spin");
-        waveform.classList.add("playing");
-        playerCard && playerCard.classList.add("playing");
+        playBtn.classList.toggle("is-playing", playing);
 
-        // Mini-player
-        miniPlayBtn && (miniPlayBtn.textContent = "⏸");
-        miniWave && miniWave.classList.add("playing");
+        if (albumArt) {
+            if (playing) {
+                albumArt.classList.add("playing");
+                albumArt.classList.remove("paused-spin");
+            } else if (hasPreviouslyPlayed) {
+                // Keep .playing to hold the animation, add paused-spin to freeze it
+                albumArt.classList.add("paused-spin");
+            }
+        }
 
-        // DVD
-        if (!dvdAnimId) animateDVD();
-        else cancelAnimationFrame(dvdAnimId), (dvdAnimId = null), animateDVD();
+        if (waveformEl)      waveformEl.classList.toggle("playing", playing);
+        if (playerContainer) playerContainer.classList.toggle("playing", playing);
+
+        // Mini-player waveform sync
+        const miniWave = document.getElementById("mini-waveform");
+        const miniBtn  = document.getElementById("mini-play-btn");
+        if (miniWave) miniWave.classList.toggle("playing", playing);
+        if (miniBtn)  miniBtn.textContent = playing ? "⏸" : "▶";
     }
 
-    // Enter paused state
-    function enterPausedState() {
-        isPlaying = false;
-        playBtn.classList.remove("is-playing");
-        playBtn.setAttribute("aria-label", `Play ${audio.title || "track"}`);
-
-        albumArt.classList.remove("playing");
-        albumArt.classList.add("paused-spin");
-        waveform.classList.remove("playing");
-        playerCard && playerCard.classList.remove("playing");
-
-        // Mini-player
-        miniPlayBtn && (miniPlayBtn.textContent = "▶");
-        miniWave && miniWave.classList.remove("playing");
-
-        // Stop DVD
-        if (dvdAnimId) { cancelAnimationFrame(dvdAnimId); dvdAnimId = null; }
-    }
-
-    // Toggle play/pause (shared between main and mini button)
-    function togglePlayback() {
-        if (!audio) return;
-        if (!isPlaying) {
-            audio.play()
-                .then(enterPlayingState)
-                .catch((err) => console.error("Playback failed:", err));
-        } else {
+    // Play / Pause button
+    playBtn.addEventListener("click", () => {
+        if (isPlaying) {
             audio.pause();
-            enterPausedState();
+        } else {
+            audio.play().catch(() => {});
         }
-    }
-
-    // Wire buttons
-    playBtn    && playBtn.addEventListener("click", togglePlayback);
-    miniPlayBtn && miniPlayBtn.addEventListener("click", togglePlayback);
-
-    // Audio error debug
-    audio && audio.addEventListener("error", () => {
-        console.error("Audio failed to load:", audio.currentSrc || audio.src);
     });
 
-    // Duration loaded
-    audio && audio.addEventListener("loadedmetadata", () => {
-        timeEnd && (timeEnd.textContent = formatTime(audio.duration));
+    audio.addEventListener("play",  () => setPlayingState(true));
+    audio.addEventListener("pause", () => setPlayingState(false));
+    audio.addEventListener("ended", () => setPlayingState(false));
+
+    // Metadata loaded — show duration
+    audio.addEventListener("loadedmetadata", () => {
+        if (timeEndEl) timeEndEl.textContent = formatTime(audio.duration);
     });
 
-    // Auto-reset UI when track ends
-    audio && audio.addEventListener("ended", enterPausedState);
+    // Time update — progress bar + lyrics sync
+    audio.addEventListener("timeupdate", () => {
+        if (!audio.duration || seekDragging) return;
 
-    /* ---- Progress bar update (timeupdate) ---- */
-    audio && audio.addEventListener("timeupdate", () => {
-        if (!audio.duration) return;
-        const pct = (audio.currentTime / audio.duration) * 100;
+        const pct = audio.currentTime / audio.duration;
+        if (progressFill) progressFill.style.width = `${pct * 100}%`;
+        if (progressTrack) progressTrack.setAttribute("aria-valuenow", Math.round(pct * 100));
+        if (timeCurrentEl) timeCurrentEl.textContent = formatTime(audio.currentTime);
 
-        if (progressFill) progressFill.style.width = `${pct}%`;
-        if (progressTrack) progressTrack.setAttribute("aria-valuenow", Math.round(pct));
-        if (timeCurrent) timeCurrent.textContent = formatTime(audio.currentTime);
+        updateLyrics(audio.currentTime);
     });
 
-    /* ---- Progress bar seek (click + drag) ---- */
-    if (progressTrack && audio) {
-        let seeking = false;
-
-        function seek(clientX) {
+    // Seek — click on progress track
+    if (progressTrack) {
+        const seek = (e) => {
             const rect = progressTrack.getBoundingClientRect();
-            const pct  = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-            audio.currentTime = pct * audio.duration;
-        }
+            const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            audio.currentTime = pct * (audio.duration || 0);
+        };
 
         progressTrack.addEventListener("mousedown", (e) => {
-            seeking = true;
-            seek(e.clientX);
+            seekDragging = true;
+            seek(e);
         });
-
         window.addEventListener("mousemove", (e) => {
-            if (seeking) seek(e.clientX);
+            if (seekDragging) seek(e);
+        });
+        window.addEventListener("mouseup", () => {
+            seekDragging = false;
         });
 
-        window.addEventListener("mouseup", () => { seeking = false; });
-
-        // Touch support
         progressTrack.addEventListener("touchstart", (e) => {
-            seeking = true;
-            seek(e.touches[0].clientX);
+            seekDragging = true;
+            seek(e.touches[0]);
         }, { passive: true });
-
         window.addEventListener("touchmove", (e) => {
-            if (seeking) seek(e.touches[0].clientX);
+            if (seekDragging) seek(e.touches[0]);
         }, { passive: true });
+        window.addEventListener("touchend", () => {
+            seekDragging = false;
+        });
 
-        window.addEventListener("touchend", () => { seeking = false; });
-
-        // Keyboard (arrow keys on focused track)
+        // Keyboard seek
         progressTrack.addEventListener("keydown", (e) => {
-            if (!audio.duration) return;
-            if (e.key === "ArrowRight") audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
-            if (e.key === "ArrowLeft")  audio.currentTime = Math.max(0,              audio.currentTime - 5);
+            const step = audio.duration * 0.02;
+            if (e.key === "ArrowRight") audio.currentTime = Math.min(audio.currentTime + step, audio.duration);
+            if (e.key === "ArrowLeft")  audio.currentTime = Math.max(audio.currentTime - step, 0);
         });
     }
 
-    /* ---- Volume slider ---- */
-    if (volumeSlider && audio) {
+    // Volume
+    if (volumeSlider) {
         volumeSlider.addEventListener("input", () => {
-            const v = parseFloat(volumeSlider.value);
-            audio.volume = v;
-            if (volumeIcon) {
-                volumeIcon.textContent = v === 0 ? "🔇" : v < 0.5 ? "🔉" : "🔊";
+            audio.volume = parseFloat(volumeSlider.value);
+            if (volumeIconEl) {
+                volumeIconEl.textContent = audio.volume === 0 ? "🔇" : audio.volume < 0.5 ? "🔈" : "🔉";
             }
         });
     }
 
     /* -----------------------------------------------------------------------
-       7. STICKY MINI-PLAYER (IntersectionObserver on song section)
+       12. MINI-PLAYER — appears when song section leaves viewport
     ----------------------------------------------------------------------- */
+    const miniPlayer  = document.getElementById("mini-player");
+    const miniPlayBtn = document.getElementById("mini-play-btn");
     const songSection = document.getElementById("song-section");
+
+    if (miniPlayBtn) {
+        miniPlayBtn.addEventListener("click", () => {
+            if (isPlaying) audio.pause();
+            else audio.play().catch(() => {});
+        });
+    }
 
     if (miniPlayer && songSection) {
         const miniObserver = new IntersectionObserver((entries) => {
@@ -301,116 +423,134 @@ document.addEventListener("DOMContentLoaded", () => {
                 miniPlayer.classList.toggle("visible", !entry.isIntersecting);
             });
         }, { threshold: 0.1 });
-
         miniObserver.observe(songSection);
     }
 
     /* -----------------------------------------------------------------------
-       8. AUTO-SYNC LYRICS (.lrc PARSER)
-       Parses standard LRC format including multi-timestamp lines.
-       Active lyric glows; near lines fade with depth layering.
+       13. LRC LYRICS PARSER + SYNC
+           Path: assets/lyrics/The Neighbourhood - Softcore.lrc (IMMUTABLE)
     ----------------------------------------------------------------------- */
+    let lrcLines = [];
+    let activeIndex = -1;
     const lyricsContainer = document.getElementById("lyrics-container");
-    let lyricLines = [];
 
-    async function fetchAndParseLyrics() {
-        try {
-            const response = await fetch("assets/lyrics/The Neighbourhood - Softcore.lrc");
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const lrcText = await response.text();
-
-            const timeTagRegex = /\[(\d{2}):(\d{2}(?:\.\d{1,3})?)\]/g;
-            const entries = [];
-
-            lrcText.split("\n").forEach((line) => {
-                const tags = [...line.matchAll(timeTagRegex)];
-                if (!tags.length) return;
-                const text = line.replace(timeTagRegex, "").trim();
-                if (!text) return;
-
-                tags.forEach((tag) => {
-                    entries.push({
-                        time: parseInt(tag[1]) * 60 + parseFloat(tag[2]),
-                        text,
-                    });
-                });
-            });
-
-            entries.sort((a, b) => a.time - b.time);
-
-            entries.forEach((entry) => {
-                const p = document.createElement("p");
-                p.className = "lyric-line";
-                p.dataset.time = entry.time;
-                p.textContent  = entry.text;
-                lyricsContainer.appendChild(p);
-            });
-
-            lyricLines = lyricsContainer.querySelectorAll(".lyric-line");
-
-        } catch (err) {
-            console.error("Lyrics load failed:", err);
+    fetch("assets/lyrics/The Neighbourhood - Softcore.lrc")
+        .then((r) => {
+            if (!r.ok) throw new Error("LRC not found");
+            return r.text();
+        })
+        .then((text) => {
+            lrcLines = parseLRC(text);
+            if (lyricsContainer && lrcLines.length) renderLyrics();
+        })
+        .catch(() => {
             if (lyricsContainer) {
-                lyricsContainer.innerHTML = "<p class='lyric-line active'>♪ Lyrics not found</p>";
+                lyricsContainer.innerHTML =
+                    '<p class="lyric-line active" style="font-style:italic;opacity:0.5;">♪ Lyrics unavailable ♪</p>';
             }
-        }
+        });
+
+    function parseLRC(text) {
+        const lineRx = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
+        return text
+            .split("\n")
+            .map((line) => {
+                const m = line.match(lineRx);
+                if (!m) return null;
+                const time = parseInt(m[1]) * 60 + parseFloat(m[2] + "." + m[3]);
+                return { time, text: m[4].trim() };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.time - b.time);
     }
 
-    if (lyricsContainer) fetchAndParseLyrics();
-
-    /* ---- timeupdate: highlight active lyric with depth layers ---- */
-    if (audio && lyricsContainer) {
-        audio.addEventListener("timeupdate", () => {
-            const t = audio.currentTime;
-            let activeIdx = -1;
-
-            for (let i = 0; i < lyricLines.length; i++) {
-                if (t >= parseFloat(lyricLines[i].dataset.time)) {
-                    activeIdx = i;
-                } else {
-                    break;
-                }
-            }
-
-            lyricLines.forEach((line, i) => {
-                const dist = Math.abs(i - activeIdx);
-                line.classList.remove("active", "lyric-line--near", "lyric-line--far");
-
-                if (i === activeIdx) {
-                    line.classList.add("active");
-                    // Center the active lyric vertically
-                    const offset = line.offsetTop + line.offsetHeight / 2;
-                    lyricsContainer.style.transform = `translateY(-${offset}px)`;
-                } else if (dist === 1) {
-                    line.classList.add("lyric-line--near");
-                } else if (dist === 2) {
-                    line.classList.add("lyric-line--far");
-                }
-            });
+    function renderLyrics() {
+        lyricsContainer.innerHTML = "";
+        lrcLines.forEach((line, i) => {
+            const p = document.createElement("p");
+            p.className = "lyric-line";
+            p.textContent = line.text || "♪";
+            p.dataset.index = i;
+            lyricsContainer.appendChild(p);
         });
+    }
+
+    function updateLyrics(currentTime) {
+        if (!lrcLines.length || !lyricsContainer) return;
+
+        let newIndex = 0;
+        for (let i = 0; i < lrcLines.length; i++) {
+            if (lrcLines[i].time <= currentTime) newIndex = i;
+            else break;
+        }
+
+        if (newIndex === activeIndex) return;
+        activeIndex = newIndex;
+
+        const lines = lyricsContainer.querySelectorAll(".lyric-line");
+        lines.forEach((el, i) => {
+            el.className = "lyric-line";
+            const diff = i - activeIndex;
+            if (diff === 0)             el.classList.add("active");
+            else if (Math.abs(diff) === 1) el.classList.add("lyric-line--near");
+            else if (Math.abs(diff) <= 3)  el.classList.add("lyric-line--far");
+        });
+
+        // Scroll lyrics into view
+        const lineH = 70; // approximate px per line
+        lyricsContainer.style.transform =
+            `translateY(calc(-50% - ${activeIndex * lineH}px + ${lineH / 2}px))`;
     }
 
     /* -----------------------------------------------------------------------
-       9. MAGNETIC CONTACT BUTTON
+       14. DVD EASTER EGG — bouncing logo
     ----------------------------------------------------------------------- */
-    const magnetBtn = document.querySelector(".magnetic-btn");
+    const dvdLogo      = document.getElementById("dvd-logo");
+    const dvdContainer = document.getElementById("dvd-container");
 
-    if (enablePointerFX && magnetBtn) {
-        let pulling = false;
+    if (dvdLogo && dvdContainer) {
+        const dvdColors = [
+            "#5ba4d4", "#3b8ec8", "#7bbfde",
+            "#2a7ab0", "#4096c8", "#1e5fa0",
+        ];
+        let dvdX = 80, dvdY = 80, dvdVX = 1.5, dvdVY = 1.2;
+        let dvdColorIdx = 0;
 
-        magnetBtn.addEventListener("mouseenter", () => { pulling = true; });
-        magnetBtn.addEventListener("mouseleave", () => {
-            pulling = false;
-            magnetBtn.style.transform = "";
-        });
+        function dvdTick() {
+            if (!isPlaying) {
+                requestAnimationFrame(dvdTick);
+                return;
+            }
 
-        frameTasks.push(() => {
-            if (!pulling) return;
-            const rect = magnetBtn.getBoundingClientRect();
-            const relX = pointer.x - (rect.left + rect.width  / 2);
-            const relY = pointer.y - (rect.top  + rect.height / 2);
-            magnetBtn.style.transform = `translate(${relX * 0.2}px, ${relY * 0.2}px)`;
-        });
+            const cw  = dvdContainer.offsetWidth;
+            const ch  = dvdContainer.offsetHeight;
+            const lw  = dvdLogo.offsetWidth;
+            const lh  = dvdLogo.offsetHeight;
+
+            dvdX += dvdVX;
+            dvdY += dvdVY;
+
+            if (dvdX + lw >= cw) { dvdX = cw - lw; dvdVX *= -1; dvdColorIdx = (dvdColorIdx + 1) % dvdColors.length; }
+            if (dvdX <= 0)        { dvdX = 0;         dvdVX *= -1; dvdColorIdx = (dvdColorIdx + 1) % dvdColors.length; }
+            if (dvdY + lh >= ch)  { dvdY = ch - lh;   dvdVY *= -1; dvdColorIdx = (dvdColorIdx + 1) % dvdColors.length; }
+            if (dvdY <= 0)        { dvdY = 0;          dvdVY *= -1; dvdColorIdx = (dvdColorIdx + 1) % dvdColors.length; }
+
+            dvdLogo.style.left  = `${dvdX}px`;
+            dvdLogo.style.top   = `${dvdY}px`;
+            dvdLogo.style.color = dvdColors[dvdColorIdx];
+            dvdLogo.style.borderColor = dvdColors[dvdColorIdx];
+            dvdLogo.style.textShadow  = `0 0 12px ${dvdColors[dvdColorIdx]}aa`;
+
+            requestAnimationFrame(dvdTick);
+        }
+
+        dvdTick();
     }
 
-});
+    /* -----------------------------------------------------------------------
+       15. INITIAL SCROLL STATE
+    ----------------------------------------------------------------------- */
+    updateScrollBar();
+    setBgColor(0);
+
+}); // end DOMContentLoaded
