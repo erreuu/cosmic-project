@@ -1,298 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nabil — Identity | Kelompok 2 Portfolio</title>
-    <meta name="description" content="Nabil EL Aufa — Web Developer. Personal profile featuring biography, skills, favorite song with synchronized lyrics, and more.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nabil — Sketchbook | Kelompok 2 Portfolio</title>
+  <meta name="description" content="Nabil EL Aufa — Web Developer. An interactive doodle-inspired personal portfolio and storytelling experience.">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500&family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <!-- Cinematic Noise Overlay -->
-    <div class="noise-overlay" aria-hidden="true"></div>
+  <!-- ================================================================
+       SVG Filter Definitions (hand-drawn effects)
+  ================================================================ -->
+  <svg class="svg-defs" aria-hidden="true">
+    <defs>
+      <filter id="rough-border" x="-8%" y="-8%" width="116%" height="116%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="2" result="turbulence"/>
+        <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="rough-line" x="-5%" y="-25%" width="110%" height="150%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="2" seed="9" result="turbulence"/>
+        <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
 
-    <!-- Custom Cursor -->
-    <div class="cursor-dot" aria-hidden="true"></div>
-    <div class="cursor-ring" aria-hidden="true"></div>
+  <!-- Paper Texture Overlay -->
+  <div class="paper-overlay" aria-hidden="true"></div>
 
-    <!-- Navigation -->
-    <nav class="profile-nav" aria-label="Member page navigation">
-        <a href="../../index.html" class="back-link" aria-label="Back to all members">← View All Members</a>
-        <span class="nav-id" aria-label="Identity number 01, Web Developer">01 / WEB DEVELOPER</span>
-    </nav>
+  <!-- Custom Cursor -->
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
 
-    <!-- ================================================================
-         STICKY MINI-PLAYER (shown when scrolling past song section)
-    ================================================================ -->
-    <div class="mini-player" id="mini-player" aria-label="Now playing — mini player" aria-live="polite">
-        <img src="assets/images/cover.jpg" alt="Softcore cover art" class="mini-cover" id="mini-cover">
-        <div class="mini-info">
-            <span class="mini-title">softcore</span>
-            <span class="mini-artist">the neighbourhood</span>
-        </div>
-        <div class="mini-waveform" id="mini-waveform">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <button class="mini-play-btn" id="mini-play-btn" aria-label="Play / Pause">▶</button>
+  <!-- Navigation -->
+  <nav class="profile-nav" aria-label="Member page navigation">
+    <a href="../../index.html" class="back-link" aria-label="Back to all members">
+      <svg width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true" class="back-arrow-svg">
+        <path d="M18 6H2M2 6L7 1M2 6L7 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#rough-line)"/>
+      </svg>
+      View All Members
+    </a>
+    <span class="nav-id" aria-label="Identity 01, Web Developer">01 / WEB DEVELOPER</span>
+  </nav>
+
+  <!-- ================================================================
+       Scroll Progress Bar (from Horizon Hero technique)
+  ================================================================ -->
+  <div class="scroll-bar-wrap" id="scroll-bar" aria-hidden="true">
+    <span class="scroll-bar-label">SCROLL</span>
+    <div class="scroll-bar-track">
+      <div class="scroll-bar-fill" id="scroll-fill"></div>
+    </div>
+    <span class="scroll-bar-counter" id="scroll-counter">01 / 10</span>
+  </div>
+
+  <!-- Sticky Mini-Player -->
+  <div class="mini-player" id="mini-player" aria-label="Now playing — mini player" aria-live="polite">
+    <img src="assets/images/cover.jpg" alt="Softcore cover art" class="mini-cover" id="mini-cover">
+    <div class="mini-info">
+      <span class="mini-title">softcore</span>
+      <span class="mini-artist">the neighbourhood</span>
+    </div>
+    <div class="mini-waveform" id="mini-waveform">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+    <button class="mini-play-btn" id="mini-play-btn" aria-label="Play / Pause">▶</button>
+  </div>
+
+  <!-- ================================================================
+       Parallax Doodle Background Layers
+       Three depth layers — slow / mid / fast
+       (adapted from Horizon Hero mountain parallax technique)
+  ================================================================ -->
+  <div class="doodle-parallax" aria-hidden="true">
+
+    <!-- Layer 1: Slow (clouds — furthest depth) -->
+    <div class="doodle-layer doodle-layer--slow">
+      <svg class="dp-el dp-cloud" style="--dx:7vw;--dy:14vh;" viewBox="0 0 140 68" fill="none">
+        <path d="M22 52 Q10 52 10 40 Q10 28 22 28 Q24 16 38 16 Q52 8 64 20 Q76 12 86 22 Q102 20 102 36 Q110 36 110 46 Q110 52 98 52Z" stroke="var(--blue-primary)" stroke-width="1.5" fill="var(--blue-pale)" filter="url(#rough-line)"/>
+      </svg>
+      <svg class="dp-el dp-cloud dp-cloud--sm" style="--dx:70vw;--dy:22vh;" viewBox="0 0 110 54" fill="none">
+        <path d="M18 42 Q8 42 8 32 Q8 22 18 22 Q20 14 30 14 Q42 8 50 18 Q60 14 68 22 Q82 22 82 32 Q88 32 88 42 Q88 42 76 42Z" stroke="var(--blue-primary)" stroke-width="1.3" fill="var(--blue-pale)" filter="url(#rough-line)"/>
+      </svg>
+      <svg class="dp-el dp-cloud dp-cloud--sm" style="--dx:38vw;--dy:55vh;" viewBox="0 0 92 46" fill="none">
+        <path d="M15 36 Q6 36 6 27 Q6 18 15 18 Q17 12 26 12 Q34 7 40 14 Q48 10 54 18 Q66 18 66 28 Q70 28 70 36 Q70 36 60 36Z" stroke="var(--blue-primary)" stroke-width="1.2" fill="var(--blue-pale)" filter="url(#rough-line)"/>
+      </svg>
     </div>
 
-    <main>
+    <!-- Layer 2: Mid (stars — middle depth) -->
+    <div class="doodle-layer doodle-layer--mid">
+      <svg class="dp-el dp-star" style="--dx:13vw;--dy:60vh;" viewBox="0 0 36 36" fill="none">
+        <path d="M18 2L21.5 13H33L24 19.5L27.5 31L18 24L8.5 31L12 19.5L3 13H14.5Z" stroke="var(--blue-bright)" stroke-width="1.5" fill="rgba(91,164,212,0.07)" filter="url(#rough-line)"/>
+      </svg>
+      <svg class="dp-el dp-star dp-star--sm" style="--dx:83vw;--dy:38vh;" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L14.5 9H22L15.5 13.5L18 21L12 16.5L6 21L8.5 13.5L2 9H9.5Z" stroke="var(--blue-bright)" stroke-width="1.2" fill="rgba(91,164,212,0.09)" filter="url(#rough-line)"/>
+      </svg>
+      <svg class="dp-el dp-star" style="--dx:88vw;--dy:76vh;" viewBox="0 0 36 36" fill="none">
+        <path d="M18 2L21.5 13H33L24 19.5L27.5 31L18 24L8.5 31L12 19.5L3 13H14.5Z" stroke="var(--blue-bright)" stroke-width="1.5" fill="rgba(91,164,212,0.07)" filter="url(#rough-line)"/>
+      </svg>
+      <svg class="dp-el dp-star dp-star--sm" style="--dx:50vw;--dy:32vh;" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L14.5 9H22L15.5 13.5L18 21L12 16.5L6 21L8.5 13.5L2 9H9.5Z" stroke="var(--blue-bright)" stroke-width="1.2" fill="rgba(91,164,212,0.09)" filter="url(#rough-line)"/>
+      </svg>
+    </div>
 
-        <!-- ================================================================
-             1. HERO
-        ================================================================ -->
-        <section class="fullscreen-section hero-section" id="section-hero">
-            <div class="ambient-gradient hero-glow" aria-hidden="true"></div>
+    <!-- Layer 3: Fast (dots, squiggles — closest depth) -->
+    <div class="doodle-layer doodle-layer--fast">
+      <svg class="dp-el dp-dots" style="--dx:3vw;--dy:30vh;" viewBox="0 0 60 60" fill="none">
+        <circle cx="10" cy="10" r="2.5" fill="var(--blue-primary)" opacity="0.35"/>
+        <circle cx="28" cy="6" r="1.8" fill="var(--blue-primary)" opacity="0.25"/>
+        <circle cx="46" cy="18" r="2.5" fill="var(--blue-primary)" opacity="0.35"/>
+        <circle cx="15" cy="36" r="1.8" fill="var(--blue-primary)" opacity="0.22"/>
+        <circle cx="50" cy="42" r="2.5" fill="var(--blue-primary)" opacity="0.3"/>
+        <circle cx="8" cy="54" r="1.8" fill="var(--blue-primary)" opacity="0.28"/>
+        <circle cx="38" cy="52" r="2.5" fill="var(--blue-primary)" opacity="0.32"/>
+      </svg>
+      <svg class="dp-el dp-dots" style="--dx:87vw;--dy:60vh;" viewBox="0 0 50 50" fill="none">
+        <circle cx="8" cy="8" r="2" fill="var(--blue-primary)" opacity="0.3"/>
+        <circle cx="26" cy="4" r="1.5" fill="var(--blue-primary)" opacity="0.22"/>
+        <circle cx="42" cy="16" r="2" fill="var(--blue-primary)" opacity="0.3"/>
+        <circle cx="18" cy="36" r="1.5" fill="var(--blue-primary)" opacity="0.2"/>
+        <circle cx="40" cy="44" r="2" fill="var(--blue-primary)" opacity="0.28"/>
+      </svg>
+      <svg class="dp-el dp-squiggle" style="--dx:63vw;--dy:19vh;" viewBox="0 0 100 24" fill="none">
+        <path d="M4 12 Q14 4 24 12 Q34 20 44 12 Q54 4 64 12 Q74 20 84 12 Q92 6 98 12" stroke="var(--blue-primary)" stroke-width="1.5" fill="none" opacity="0.32" filter="url(#rough-line)"/>
+      </svg>
+      <svg class="dp-el dp-squiggle" style="--dx:4vw;--dy:78vh;" viewBox="0 0 80 20" fill="none">
+        <path d="M3 10 Q11 3 20 10 Q28 17 37 10 Q46 3 54 10 Q62 17 70 10 Q75 5 78 10" stroke="var(--blue-primary)" stroke-width="1.3" fill="none" opacity="0.28" filter="url(#rough-line)"/>
+      </svg>
+    </div>
 
-            <div class="hero-content">
-                <p class="hero-mono fade-up">IDENTITY 01</p>
-                <h1 class="hero-title fade-up" style="--delay: 0.1s">Nabil.</h1>
-                <p class="hero-subtitle fade-up" style="--delay: 0.2s">Design. Code. Deploy.</p>
+  </div><!-- /.doodle-parallax -->
+
+  <main>
+
+    <!-- ================================================================
+         1. HERO
+    ================================================================ -->
+    <section class="fullscreen-section hero-section" id="section-hero">
+      <div class="hero-ambient" aria-hidden="true"></div>
+
+      <!-- Handwritten annotation — top left -->
+      <div class="doodle-annot hero-annot" aria-hidden="true">
+        <svg width="52" height="28" viewBox="0 0 52 28" fill="none" class="annot-arrow">
+          <path d="M4 10 Q22 10 40 4" stroke="var(--blue-primary)" stroke-width="1.3" fill="none" stroke-linecap="round" filter="url(#rough-line)"/>
+          <path d="M37 2 L40 5 L36 7" stroke="var(--blue-primary)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="annot-text">identity 01</span>
+      </div>
+
+      <div class="hero-content">
+        <p class="hero-mono">NABIL EL AUFA</p>
+
+        <!-- Title: each character wrapped for stagger animation (Horizon Hero technique) -->
+        <h1 class="hero-title" id="hero-title" aria-label="Nabil.">
+          <span class="char" style="--i:0">N</span><span
+          class="char" style="--i:1">a</span><span
+          class="char" style="--i:2">b</span><span
+          class="char" style="--i:3">i</span><span
+          class="char" style="--i:4">l</span><span
+          class="char" style="--i:5">.</span>
+        </h1>
+
+        <p class="hero-subtitle">Design. Code. Deploy.</p>
+
+        <!-- Wavy hand-drawn underline, draws in on load -->
+        <svg class="hero-underline draw-path" viewBox="0 0 260 14" fill="none" aria-hidden="true">
+          <path d="M3 9 Q55 5 110 9 Q165 13 222 9 Q240 7 257 9" stroke="var(--blue-primary)" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="scroll-indicator" aria-hidden="true">
+        <svg width="18" height="36" viewBox="0 0 18 36" fill="none">
+          <path d="M9 2 L9 30 M3 23 L9 31 L15 23" stroke="var(--blue-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#rough-line)"/>
+        </svg>
+        <span class="scroll-hint">Descend</span>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         2. INTRODUCTION
+    ================================================================ -->
+    <section class="fullscreen-section intro-section" id="section-intro">
+      <!-- Notebook ruled lines -->
+      <svg class="ruled-bg" aria-hidden="true" preserveAspectRatio="none">
+        <defs>
+          <pattern id="ruled-pat" x="0" y="0" width="100%" height="44" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="43" x2="3000" y2="43" stroke="rgba(91,164,212,0.1)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#ruled-pat)"/>
+      </svg>
+
+      <div class="story-container">
+        <p class="section-label reveal-up">INITIALIZING PROFILE</p>
+        <h2 class="story-text reveal-up" style="--delay:0.15s">
+          Hi, I am <strong>Nabil EL Aufa</strong>, A Web Developer committed to clean code
+          <span class="highlight code-chip">(git commit -m "plss work")</span>. :V
+        </h2>
+
+        <!-- Doodle annotation pointing to the commit joke -->
+        <div class="doodle-annot story-annot" aria-hidden="true">
+          <svg width="42" height="52" viewBox="0 0 42 52" fill="none" class="annot-arrow annot-arrow--down">
+            <path d="M21 3 Q28 24 14 46" stroke="var(--blue-primary)" stroke-width="1.3" fill="none" stroke-linecap="round" filter="url(#rough-line)"/>
+            <path d="M12 43 L14 47 L18 43" stroke="var(--blue-primary)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          </svg>
+          <span class="annot-text">been there 💀</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         3. ABOUT ME — Story
+    ================================================================ -->
+    <section class="fullscreen-section story-section" id="section-story">
+      <!-- Corner bracket doodles framing the text -->
+      <svg class="corner-brk corner-brk--tl" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+        <path d="M42 2 L2 2 L2 42" stroke="var(--blue-primary)" stroke-width="1.5" fill="none" stroke-linecap="round" filter="url(#rough-line)"/>
+      </svg>
+      <svg class="corner-brk corner-brk--br" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+        <path d="M2 42 L42 42 L42 2" stroke="var(--blue-primary)" stroke-width="1.5" fill="none" stroke-linecap="round" filter="url(#rough-line)"/>
+      </svg>
+
+      <div class="story-container">
+        <h2 class="story-text text-reveal" id="story-text">
+          The browser only shows the final result. It never shows the refactors,
+          the failed experiments, or the hours spent chasing a single bug.
+          That's the part I enjoy the most — turning
+          <span class="highlight">complex problems</span> into
+          <span class="highlight">simple experiences</span> through
+          <span class="highlight">clean code.</span>
+          One <span class="highlight">commit at a time.</span>
+        </h2>
+
+        <!-- Marginalia note — Caveat font, hand-written feel -->
+        <div class="doodle-annot marginalia" aria-hidden="true">
+          <span class="annot-text">commit -m<br>"fix everything"</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         4. SKILLS
+    ================================================================ -->
+    <section class="fullscreen-section skills-section" id="section-skills">
+      <div class="skills-container">
+        <p class="section-label reveal-up">CAPABILITIES</p>
+
+        <div class="skill-row reveal-up" style="--delay:0.1s">
+          <div class="skill-info">
+            <span class="skill-name">
+              <!-- Browser doodle icon -->
+              <svg class="skill-icon" viewBox="0 0 28 22" fill="none" aria-label="browser icon">
+                <rect x="1.5" y="1.5" width="25" height="19" rx="2.5" stroke="var(--blue-primary)" stroke-width="1.4" fill="none"/>
+                <line x1="1.5" y1="6.5" x2="26.5" y2="6.5" stroke="var(--blue-primary)" stroke-width="1.2"/>
+                <circle cx="5" cy="4" r="1" fill="var(--blue-primary)"/>
+                <circle cx="9" cy="4" r="1" fill="var(--blue-primary)"/>
+              </svg>
+              Frontend Development
+            </span>
+            <span class="skill-pct">94%</span>
+          </div>
+          <div class="skill-track">
+            <div class="skill-fill" data-target="94%"></div>
+          </div>
+        </div>
+
+        <div class="skill-row reveal-up" style="--delay:0.2s">
+          <div class="skill-info">
+            <span class="skill-name">
+              <!-- Plug / API doodle icon -->
+              <svg class="skill-icon" viewBox="0 0 22 26" fill="none" aria-label="api icon">
+                <path d="M6 8 L6 4 M16 8 L16 4" stroke="var(--blue-primary)" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M4 8 L18 8 L17 15 Q17 19 13 19 L9 19 Q5 19 5 15 Z" stroke="var(--blue-primary)" stroke-width="1.4" fill="none"/>
+                <path d="M11 19 L11 23" stroke="var(--blue-primary)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              API Integration
+            </span>
+            <span class="skill-pct">88%</span>
+          </div>
+          <div class="skill-track">
+            <div class="skill-fill" data-target="88%"></div>
+          </div>
+        </div>
+
+        <div class="skill-row reveal-up" style="--delay:0.3s">
+          <div class="skill-info">
+            <span class="skill-name">
+              <!-- Lightbulb doodle icon -->
+              <svg class="skill-icon" viewBox="0 0 22 26" fill="none" aria-label="learning icon">
+                <path d="M11 2 Q17 2 17 8 Q17 13 14 15 L14 18 L8 18 L8 15 Q5 13 5 8 Q5 2 11 2Z" stroke="var(--blue-primary)" stroke-width="1.4" fill="none"/>
+                <path d="M8 20 L14 20 M9.5 22.5 L12.5 22.5" stroke="var(--blue-primary)" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              Continuous Learning
+            </span>
+            <span class="skill-pct">100%</span>
+          </div>
+          <div class="skill-track">
+            <div class="skill-fill" data-target="100%"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================================================================
+         5. FAVORITE SONG — Music Player
+    ================================================================ -->
+    <section class="fullscreen-section song-section" id="song-section">
+
+      <div class="song-showcase-wrapper">
+
+        <div class="audio-player-container" id="audio-player-container">
+          <!-- Hidden audio — path is IMMUTABLE -->
+          <audio id="bgm-audio" src="assets/music/softcore.mp3" preload="metadata"></audio>
+
+          <!-- Album Art with doodle ring frame -->
+          <div class="album-art-wrap">
+            <!-- Decorative rough circle around the vinyl — does NOT spin -->
+            <svg class="album-doodle-ring" viewBox="0 0 220 220" fill="none" aria-hidden="true">
+              <path d="M110 8 Q202 6 212 98 Q218 192 110 212 Q6 218 3 110 Q-2 18 110 8" stroke="var(--blue-primary)" stroke-width="2" fill="none" filter="url(#rough-border)" opacity="0.65"/>
+            </svg>
+            <!-- Vinyl — SPINS when playing -->
+            <div class="album-art" id="album-art" role="img" aria-label="Album cover: Softcore by The Neighbourhood">
+              <img src="assets/images/cover.jpg" alt="Softcore — The Neighbourhood album cover" class="cover-img" id="cover-img">
+            </div>
+          </div>
+
+          <!-- Song Details & Controls -->
+          <div class="song-details">
+            <p class="section-label">CURRENT ROTATION</p>
+            <h3 class="song-title">softcore</h3>
+            <p class="song-artist">the neighbourhood</p>
+
+            <!-- Progress Bar -->
+            <div class="progress-wrapper" role="group" aria-label="Song progress">
+              <span class="time-label time-current" id="time-current" aria-live="off">0:00</span>
+              <div class="progress-track"
+                   id="progress-track"
+                   role="slider"
+                   aria-label="Song position"
+                   aria-valuemin="0"
+                   aria-valuemax="100"
+                   aria-valuenow="0"
+                   tabindex="0">
+                <div class="progress-fill" id="progress-fill">
+                  <div class="progress-thumb"></div>
+                </div>
+              </div>
+              <span class="time-label time-end" id="time-end" aria-live="off">0:00</span>
             </div>
 
-            <div class="scroll-indicator fade-up" style="--delay: 0.5s" aria-hidden="true">
-                <div class="mouse-icon">
-                    <div class="wheel"></div>
-                </div>
-                <span>Descend</span>
+            <!-- Play button + Equalizer -->
+            <div class="player-controls">
+              <button class="play-btn" id="play-btn" aria-label="Play Softcore by The Neighbourhood">
+                <span class="play-icon" aria-hidden="true">▶</span>
+                <span class="pause-icon" aria-hidden="true">⏸</span>
+              </button>
+              <div class="waveform" id="waveform" aria-hidden="true">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div>
+              </div>
             </div>
-        </section>
 
-        <!-- ================================================================
-             1.5. INTRODUCTION
-        ================================================================ -->
-        <section class="fullscreen-section intro-section">
-            <div class="story-container">
-                <p class="section-label fade-up">INITIALIZING PROFILE</p>
-                <h2 class="story-text fade-up" style="--delay: 0.2s">
-                    Hi, I am Nabil EL Aufa, A Web Developer committed to clean code
-                    <span class="highlight">(git commit -m "plss work")</span>. :V
-                </h2>
+            <!-- Volume -->
+            <div class="volume-row" role="group" aria-label="Volume control">
+              <span class="volume-icon" id="volume-icon" aria-hidden="true">🔉</span>
+              <input type="range" class="volume-slider" id="volume-slider"
+                     min="0" max="1" step="0.02" value="1" aria-label="Volume">
             </div>
-        </section>
+          </div>
+        </div>
 
-        <!-- ================================================================
-             2. ABOUT ME — Story
-        ================================================================ -->
-        <section class="fullscreen-section story-section">
-            <div class="story-container">
-                <h2 class="story-text text-reveal">
-                    The browser only shows the final result. It never shows the refactors,
-                    the failed experiments, or the hours spent chasing a single bug.
-                    That's the part I enjoy the most — turning
-                    <span class="highlight">complex problems</span> into
-                    <span class="highlight">simple experiences</span> through
-                    <span class="highlight">clean code.</span>
-                    One <span class="highlight">commit at a time.</span>
-                </h2>
-            </div>
-        </section>
+        <!-- Song Description -->
+        <div class="song-description-box reveal-up" style="--delay:0.3s">
+          <!-- Hand-drawn left accent line -->
+          <svg class="desc-accent-line" viewBox="0 0 4 80" fill="none" aria-hidden="true" preserveAspectRatio="none">
+            <path d="M2 2 Q3 20 2 40 Q1 60 2 78" stroke="var(--blue-bright)" stroke-width="2" fill="none" filter="url(#rough-line)"/>
+          </svg>
+          <p>
+            "Lagu ini tentang ingin mempertahankan seseorang, tapi di saat yang sama sadar bahwa diri sendiri sedang terlalu kacau untuk menjadi alasan seseorang tetap bertahan."
+          </p>
+        </div>
 
-        <!-- ================================================================
-             3. SKILLS
-        ================================================================ -->
-        <section class="fullscreen-section skills-section">
-            <div class="skills-container">
-                <p class="section-label">CAPABILITIES</p>
+      </div>
+    </section>
 
-                <div class="skill-row">
-                    <div class="skill-info">
-                        <span class="skill-name">Frontend Development</span>
-                        <span class="skill-pct">94%</span>
-                    </div>
-                    <div class="skill-track">
-                        <div class="skill-fill" data-target="94%"></div>
-                    </div>
-                </div>
+    <!-- ================================================================
+         6. LYRICS EXPERIENCE (Auto-Sync)
+    ================================================================ -->
+    <section class="fullscreen-section lyrics-section" id="lyrics-section">
+      <!-- Subtle ruled background for lyrics -->
+      <svg class="ruled-bg" aria-hidden="true" preserveAspectRatio="none">
+        <defs>
+          <pattern id="ruled-lyric" x="0" y="0" width="100%" height="52" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="51" x2="3000" y2="51" stroke="rgba(91,164,212,0.07)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#ruled-lyric)"/>
+      </svg>
+      <p class="section-label absolute-label">LYRICS</p>
+      <div class="lyrics-wrapper">
+        <div class="lyrics-container" id="lyrics-container" aria-live="polite" aria-atomic="false">
+          <!-- Lyrics injected by JavaScript from .lrc file -->
+        </div>
+      </div>
+    </section>
 
-                <div class="skill-row">
-                    <div class="skill-info">
-                        <span class="skill-name">API Integration</span>
-                        <span class="skill-pct">88%</span>
-                    </div>
-                    <div class="skill-track">
-                        <div class="skill-fill" data-target="88%"></div>
-                    </div>
-                </div>
+    <!-- ================================================================
+         7. DVD LOGO EASTER EGG
+    ================================================================ -->
+    <section class="fullscreen-section dvd-section" id="dvd-container">
+      <p class="section-label absolute-label">EASTER EGG</p>
+      <div class="doodle-annot dvd-annot" aria-hidden="true">
+        <span class="annot-text">🥚 easter egg spotted</span>
+      </div>
+      <div id="dvd-logo" aria-hidden="true">NABIL</div>
+    </section>
 
-                <div class="skill-row">
-                    <div class="skill-info">
-                        <span class="skill-name">Continuous Learning</span>
-                        <span class="skill-pct">100%</span>
-                    </div>
-                    <div class="skill-track">
-                        <div class="skill-fill" data-target="100%"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <!-- ================================================================
+         8. FAVORITE QUOTE
+    ================================================================ -->
+    <section class="fullscreen-section quote-section" id="section-quote">
+      <!-- Hand-drawn opening quote marks -->
+      <svg class="quote-mark quote-mark--open" viewBox="0 0 64 56" fill="none" aria-hidden="true">
+        <path d="M5 40 Q5 14 22 8 L16 28 Q28 24 28 40 Q28 54 16 54 Q4 54 5 40Z" stroke="var(--blue-primary)" stroke-width="1.5" fill="var(--blue-pale)" filter="url(#rough-border)"/>
+        <path d="M36 40 Q36 14 53 8 L47 28 Q59 24 59 40 Q59 54 47 54 Q35 54 36 40Z" stroke="var(--blue-primary)" stroke-width="1.5" fill="var(--blue-pale)" filter="url(#rough-border)"/>
+      </svg>
 
-        <!-- ================================================================
-             4. FAVORITE SONG — Music Player
-        ================================================================ -->
-        <section class="fullscreen-section song-section" id="song-section">
-            <div class="ambient-gradient song-glow" aria-hidden="true"></div>
+      <h2 class="massive-quote">
+        <span class="quote-line quote-line--left">Every line i write holds a feeling</span><br>
+        <span class="quote-line quote-line--right">I could'nt put into words.</span>
+      </h2>
 
-            <div class="song-showcase-wrapper">
+      <!-- Wavy underline draws in when section enters viewport -->
+      <svg class="quote-underline draw-path" viewBox="0 0 420 12" fill="none" aria-hidden="true">
+        <path d="M4 7 Q100 4 210 7 Q300 10 416 7" stroke="var(--blue-primary)" stroke-width="1.8" fill="none"/>
+      </svg>
 
-                <div class="audio-player-container" id="audio-player-container">
-                    <!-- Hidden audio element -->
-                    <audio id="bgm-audio" src="assets/music/softcore.mp3" preload="metadata"></audio>
+      <!-- Closing quote marks -->
+      <svg class="quote-mark quote-mark--close" viewBox="0 0 64 56" fill="none" aria-hidden="true">
+        <path d="M5 40 Q5 14 22 8 L16 28 Q28 24 28 40 Q28 54 16 54 Q4 54 5 40Z" stroke="var(--blue-primary)" stroke-width="1.5" fill="var(--blue-pale)" filter="url(#rough-border)"/>
+        <path d="M36 40 Q36 14 53 8 L47 28 Q59 24 59 40 Q59 54 47 54 Q35 54 36 40Z" stroke="var(--blue-primary)" stroke-width="1.5" fill="var(--blue-pale)" filter="url(#rough-border)"/>
+      </svg>
+    </section>
 
-                    <!-- Vinyl Album Art -->
-                    <div class="album-art" id="album-art" role="img" aria-label="Album cover: Softcore by The Neighbourhood">
-                        <img src="assets/images/cover.jpg" alt="Softcore — The Neighbourhood album cover" class="cover-img" id="cover-img">
-                    </div>
+    <!-- ================================================================
+         9. GALLERY
+    ================================================================ -->
+    <section class="fullscreen-section gallery-section" id="section-gallery">
+      <p class="section-label reveal-up">FIELD LOG</p>
+      <div class="gallery-grid">
 
-                    <!-- Song Details & Controls -->
-                    <div class="song-details">
-                        <p class="section-label">CURRENT ROTATION</p>
-                        <h3 class="song-title">softcore</h3>
-                        <p class="song-artist">the neighbourhood</p>
+        <!-- Polaroid-style card, slightly tilted left -->
+        <div class="polaroid polaroid--left reveal-up" style="--delay:0s">
+          <div class="polaroid-img">
+            <svg viewBox="0 0 80 60" fill="none" aria-hidden="true" class="polaroid-sketch">
+              <rect x="2" y="2" width="76" height="56" rx="2" stroke="var(--blue-primary)" stroke-width="1.4" fill="none"/>
+              <path d="M2 44 L20 28 L36 40 L52 24 L78 44" stroke="var(--blue-primary)" stroke-width="1.1" fill="none"/>
+              <circle cx="58" cy="18" r="7" stroke="var(--blue-primary)" stroke-width="1.1" fill="none"/>
+            </svg>
+          </div>
+          <span class="polaroid-caption">LOG 01 // FIRST BUILD</span>
+        </div>
 
-                        <!-- Progress Bar -->
-                        <div class="progress-wrapper" role="group" aria-label="Song progress">
-                            <span class="time-label time-current" id="time-current" aria-live="off">0:00</span>
-                            <div class="progress-track"
-                                 id="progress-track"
-                                 role="slider"
-                                 aria-label="Song position"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100"
-                                 aria-valuenow="0"
-                                 tabindex="0">
-                                <div class="progress-fill" id="progress-fill">
-                                    <div class="progress-thumb"></div>
-                                </div>
-                            </div>
-                            <span class="time-label time-end" id="time-end" aria-live="off">0:00</span>
-                        </div>
+        <!-- Polaroid-style card, center (no tilt) -->
+        <div class="polaroid polaroid--center reveal-up" style="--delay:0.12s">
+          <div class="polaroid-img">
+            <svg viewBox="0 0 80 60" fill="none" aria-hidden="true" class="polaroid-sketch">
+              <rect x="2" y="2" width="76" height="56" rx="2" stroke="var(--blue-primary)" stroke-width="1.4" fill="none"/>
+              <rect x="10" y="8" width="22" height="18" rx="1.5" stroke="var(--blue-primary)" stroke-width="1.1" fill="none"/>
+              <path d="M14 18 L18 12 L22 17" stroke="var(--blue-primary)" stroke-width="1" fill="none"/>
+              <line x1="38" y1="12" x2="70" y2="12" stroke="var(--blue-primary)" stroke-width="1" stroke-linecap="round"/>
+              <line x1="38" y1="18" x2="64" y2="18" stroke="var(--blue-primary)" stroke-width="1" stroke-linecap="round"/>
+              <line x1="38" y1="24" x2="68" y2="24" stroke="var(--blue-primary)" stroke-width="1" stroke-linecap="round"/>
+              <path d="M10 44 L28 36 L48 44 L68 36" stroke="var(--blue-primary)" stroke-width="1.1" fill="none"/>
+            </svg>
+          </div>
+          <span class="polaroid-caption">LOG 02 // LATE NIGHT CODE</span>
+        </div>
 
-                        <!-- Play button + Equalizer -->
-                        <div class="player-controls">
-                            <button class="play-btn" id="play-btn" aria-label="Play Softcore by The Neighbourhood">
-                                <span class="play-icon" aria-hidden="true">▶</span>
-                                <span class="pause-icon" aria-hidden="true">⏸</span>
-                            </button>
+        <!-- Polaroid-style card, slightly tilted right -->
+        <div class="polaroid polaroid--right reveal-up" style="--delay:0.24s">
+          <div class="polaroid-img">
+            <svg viewBox="0 0 80 60" fill="none" aria-hidden="true" class="polaroid-sketch">
+              <rect x="2" y="2" width="76" height="56" rx="2" stroke="var(--blue-primary)" stroke-width="1.4" fill="none"/>
+              <path d="M32 46 L32 24 M26 32 L32 24 L38 32" stroke="var(--blue-primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="10" y="14" width="15" height="12" rx="1" stroke="var(--blue-primary)" stroke-width="1.1" fill="none"/>
+              <line x1="50" y1="18" x2="70" y2="18" stroke="var(--blue-primary)" stroke-width="1" stroke-linecap="round"/>
+              <line x1="50" y1="24" x2="66" y2="24" stroke="var(--blue-primary)" stroke-width="1" stroke-linecap="round"/>
+              <line x1="50" y1="30" x2="68" y2="30" stroke="var(--blue-primary)" stroke-width="1" stroke-linecap="round"/>
+              <path d="M10 52 Q40 46 70 52" stroke="var(--blue-primary)" stroke-width="1" fill="none"/>
+            </svg>
+          </div>
+          <span class="polaroid-caption">LOG 03 // FINAL DEPLOY</span>
+        </div>
 
-                            <div class="waveform" id="waveform" aria-hidden="true">
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                                <div class="bar"></div>
-                            </div>
-                        </div>
+      </div>
+    </section>
 
-                        <!-- Volume -->
-                        <div class="volume-row" role="group" aria-label="Volume control">
-                            <span class="volume-icon" id="volume-icon" aria-hidden="true">🔉</span>
-                            <input
-                                type="range"
-                                class="volume-slider"
-                                id="volume-slider"
-                                min="0"
-                                max="1"
-                                step="0.02"
-                                value="1"
-                                aria-label="Volume"
-                            >
-                        </div>
-                    </div>
-                </div>
+    <!-- ================================================================
+         10. CONTACT
+    ================================================================ -->
+    <section class="fullscreen-section contact-section" id="section-contact">
+      <!-- Hand-drawn envelope -->
+      <svg class="envelope-doodle" viewBox="0 0 90 62" fill="none" aria-hidden="true">
+        <rect x="2" y="8" width="86" height="52" rx="4" stroke="var(--blue-primary)" stroke-width="1.5" fill="var(--blue-pale)" filter="url(#rough-border)"/>
+        <path d="M2 14 L45 38 L88 14" stroke="var(--blue-primary)" stroke-width="1.5" fill="none" filter="url(#rough-line)"/>
+        <path d="M2 58 L30 40 M88 58 L60 40" stroke="var(--blue-primary)" stroke-width="1" fill="none" opacity="0.45"/>
+        <path d="M34 10 Q45 5 56 10" stroke="var(--blue-primary)" stroke-width="1" fill="none" opacity="0.4"/>
+      </svg>
 
-                <!-- Song Description -->
-                <div class="song-description-box fade-up" style="--delay: 0.3s">
-                    <p>
-                        "Lagu ini punya nuansa synthwave yang memberikan kesan retro-futuristik. Ketukannya yang stabil
-                        sangat pas menemani saat sedang merancang topologi jaringan dan konfigurasi server di malam hari.
-                        Memberikan fokus, energi, dan ketenangan sekaligus."
-                    </p>
-                </div>
+      <div class="contact-content">
+        <h2 class="hero-title reveal-up">Initiate Ping.</h2>
+        <a href="mailto:cupcakeFreak@group.my.id"
+           class="contact-email reveal-up"
+           style="--delay:0.2s"
+           aria-label="Send email to Nabil">
+          cupcakeFreak@group.my.id
+          <!-- Hover underline draws in -->
+          <svg class="email-underline" viewBox="0 0 320 12" fill="none" aria-hidden="true">
+            <path d="M2 7 Q80 3 160 7 Q240 11 318 7" stroke="var(--blue-bright)" stroke-width="2" fill="none" filter="url(#rough-line)"/>
+          </svg>
+        </a>
+        <div class="footer-bottom">
+          <p class="hero-mono">© 2026 Interactive Portfolio · Kelompok 2</p>
+        </div>
+      </div>
+    </section>
 
-            </div>
-        </section>
+  </main>
 
-        <!-- ================================================================
-             5. LYRICS EXPERIENCE (Auto-Sync)
-        ================================================================ -->
-        <section class="fullscreen-section lyrics-section" id="lyrics-section">
-            <div class="lyrics-wrapper">
-                <div class="lyrics-container" id="lyrics-container" aria-live="polite" aria-atomic="false">
-                    <!-- Lyrics injected by JavaScript from .lrc file -->
-                </div>
-            </div>
-        </section>
-
-        <!-- ================================================================
-             6. DVD LOGO EASTER EGG
-        ================================================================ -->
-        <section class="fullscreen-section dvd-section" id="dvd-container">
-            <p class="section-label absolute-label">SYSTEM IDLE // EASTER EGG</p>
-            <div id="dvd-logo" aria-hidden="true">NABIL</div>
-        </section>
-
-        <!-- ================================================================
-             7. FAVORITE QUOTE
-        ================================================================ -->
-        <section class="fullscreen-section quote-section">
-            <h2 class="massive-quote fade-up">
-                "Connectivity is not just a cable.<br>It is a lifeline."
-            </h2>
-        </section>
-
-        <!-- ================================================================
-             8. GALLERY
-        ================================================================ -->
-        <section class="fullscreen-section gallery-section">
-            <div class="gallery-grid">
-                <div class="gallery-item fade-up">
-                    <div class="img-placeholder">LOG 01 // SERVER RACK</div>
-                </div>
-                <div class="gallery-item fade-up" style="--delay: 0.1s">
-                    <div class="img-placeholder">LOG 02 // SPLICING</div>
-                </div>
-                <div class="gallery-item fade-up" style="--delay: 0.2s">
-                    <div class="img-placeholder">LOG 03 // TOPOLOGY</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================================================================
-             9. CONTACT
-        ================================================================ -->
-        <section class="fullscreen-section contact-section">
-            <div class="contact-content">
-                <h2 class="hero-title fade-up">Initiate Ping.</h2>
-                <a href="mailto:cupcakeFreak@group.my.id"
-                   class="magnetic-btn fade-up"
-                   style="--delay: 0.2s"
-                   aria-label="Send email to Nabil">
-                    cupcakeFreak@group.my.id
-                </a>
-                <div class="footer-bottom">
-                    <p class="hero-mono">© 2026 Interactive Portfolio · Kelompok 2</p>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <script src="java script/script.js"></script>
+  <script src="java script/script.js"></script>
 </body>
 </html>
