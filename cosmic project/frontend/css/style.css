@@ -605,7 +605,7 @@ body::before {
 
 .section-heading::after {
   content: '';
-  display: inline-block;   /* BUG FIX: was 'none', garis dekoratif heading tidak tampil */
+  display: none;   
   width: 3rem;
   height: 1px;
   background: var(--cyan);
@@ -811,14 +811,14 @@ body::before {
 }
 
 .card-nabil::after {
-  content: 'her 💙';
+  content: 'his';
   background: rgba(125, 211, 252, 0.12);
   border: 1px solid rgba(125, 211, 252, 0.28);
   color: #7DD3FC;
 }
 
 .card-balqis::after {
-  content: 'his 🩵';
+  content: 'her';
   background: rgba(29, 78, 216, 0.12);
   border: 1px solid rgba(29, 78, 216, 0.28);
   color: #93C5FD;
