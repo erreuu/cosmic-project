@@ -242,6 +242,8 @@ body {
   pointer-events: none;
   z-index: 1;
   overflow: hidden;
+  /* JS fades this out as the user scrolls past the Hero */
+  transition: opacity 0.35s ease;
 }
 
 .doodle-layer {
@@ -317,7 +319,7 @@ body {
 
 .section-label::before {
   content: '';
-  display: inline-block;
+  display: none;
   width: 1.4rem;
   height: 1px;
   background: var(--blue-primary);
@@ -1191,6 +1193,9 @@ body {
 .lyrics-section {
   position: relative;
   overflow: hidden;
+  /* Guarantee lyrics content always paints above the fixed doodle layer */
+  isolation: isolate;
+  z-index: 2;
 }
 
 .lyrics-wrapper {
@@ -1207,9 +1212,11 @@ body {
 
 .lyrics-container {
   position: absolute;
-  top: 50%;
+  top: 0;
   width: 100%;
   text-align: center;
+  /* JS drives scroll via a pixel-only translateY to keep the active line centred */
+  transform: translateY(0);
   transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
   padding: 0 8%;
 }
